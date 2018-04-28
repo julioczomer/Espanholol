@@ -22,7 +22,7 @@ public interface Constants extends ScannerConstants, ParserConstants
     int t_FOR = 16;
     int t_CASO = 17;
     int t_BRAKE = 18;
-    int t_CONTINUAR = 19;
+    int t_CONTINUE = 19;
     int t_VOID = 20;
     int t_INT = 21;
     int t_FLOAT = 22;
@@ -77,5 +77,7 @@ public interface Constants extends ScannerConstants, ParserConstants
     int t_OR = 71;
     int t_NOT = 72;
     int t_XOR = 73;
+    int t_SAIDA = 74;
+    int t_ENTRADA = 75;
 
 }

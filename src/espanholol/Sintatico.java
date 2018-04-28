@@ -1,6 +1,5 @@
 package espanholol;
 
-import espanholol.Constants;
 import java.util.Stack;
 
 public class Sintatico implements Constants
