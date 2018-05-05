@@ -6,21 +6,14 @@
 package espanholol.studio;
 
 import espanholol.*;
-import espanholol.studio.EspanhololStudio;
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.Label;
-import java.awt.LayoutManager;
-import java.util.Stack;
+import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.DefaultListModel;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JOptionPane;
 
 /**
  *
@@ -98,6 +91,8 @@ public class EspanhololFRM extends javax.swing.JFrame {
         jbtCompilarExecutar = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
         jpResultado = new javax.swing.JPanel();
+        abrirBTN = new javax.swing.JButton();
+        salvarBTN = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("ML - Marotage Language");
@@ -133,6 +128,20 @@ public class EspanhololFRM extends javax.swing.JFrame {
             .addGap(0, 150, Short.MAX_VALUE)
         );
 
+        abrirBTN.setText("Abrir");
+        abrirBTN.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                abrirBTNActionPerformed(evt);
+            }
+        });
+
+        salvarBTN.setText("Salvar");
+        salvarBTN.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                salvarBTNActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -143,10 +152,14 @@ public class EspanhololFRM extends javax.swing.JFrame {
                     .addComponent(jScrollPane1)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 490, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 341, Short.MAX_VALUE)
+                        .addComponent(salvarBTN)
+                        .addGap(18, 18, 18)
+                        .addComponent(abrirBTN)
+                        .addGap(18, 18, 18)
                         .addComponent(jbtCompilarExecutar))
                     .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jpResultado, javax.swing.GroupLayout.DEFAULT_SIZE, 714, Short.MAX_VALUE))
+                    .addComponent(jpResultado, javax.swing.GroupLayout.DEFAULT_SIZE, 718, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -155,9 +168,11 @@ public class EspanhololFRM extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
-                    .addComponent(jbtCompilarExecutar))
+                    .addComponent(jbtCompilarExecutar)
+                    .addComponent(abrirBTN)
+                    .addComponent(salvarBTN))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 178, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 182, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel2)
                 .addGap(2, 2, 2)
@@ -183,6 +198,27 @@ public class EspanhololFRM extends javax.swing.JFrame {
             adicionarLog("Erro no código. Deve estar faltando um ;", Color.RED);
         } 
     }//GEN-LAST:event_jbtCompilarExecutarActionPerformed
+
+    private void abrirBTNActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_abrirBTNActionPerformed
+        final JFileChooser fc = new JFileChooser();
+        int option = fc.showOpenDialog(this);
+        if (option == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = fc.getSelectedFile();
+            String path = selectedFile.getAbsolutePath();
+            String content = FileIOManager.getFileContent(path);
+            jtaCodigoFonte.setText(content);
+        }
+    }//GEN-LAST:event_abrirBTNActionPerformed
+
+    private void salvarBTNActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_salvarBTNActionPerformed
+        final JFileChooser fc = new JFileChooser();
+        int option = fc.showOpenDialog(this);
+        if (option == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = fc.getSelectedFile();
+            String path = selectedFile.getAbsolutePath();
+            FileIOManager.createFileAndWrite(path, jtaCodigoFonte.getText());
+        }
+    }//GEN-LAST:event_salvarBTNActionPerformed
 
     /**
      * @param args the command line arguments
@@ -221,12 +257,14 @@ public class EspanhololFRM extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton abrirBTN;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JButton jbtCompilarExecutar;
     private javax.swing.JPanel jpResultado;
     private javax.swing.JTextArea jtaCodigoFonte;
+    private javax.swing.JButton salvarBTN;
     // End of variables declaration//GEN-END:variables
 
    
