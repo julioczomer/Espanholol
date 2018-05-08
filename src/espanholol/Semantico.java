@@ -13,11 +13,11 @@ public class Semantico implements Constants
     String id;
     
     /* Expressões */
-    Stack<Integer> expr = new Stack<>();    
+    Stack<Integer> expr = new Stack<>();
     
     /* Escopo */
     Stack<String> escopo = new Stack<>();
-    Integer nivel = 0;            
+    Integer nivel = 0;
     
     public Semantico() {
         escopo.add("global");
