@@ -25,7 +25,7 @@ public class Semantico implements Constants
     Boolean escopo_antecipado = false;
     
     public Semantico() {
-        escopos.add(new Pair("global", 0));
+        escopos.push(new Pair("global", 0));
     }
         
     public void executeAction(int action, Token token) throws SemanticError
@@ -39,8 +39,8 @@ public class Semantico implements Constants
             case 2: // ID
                 this.id = lex;
                 if(declarando) {
-                    if(existeSimboloComMesmoId(this.id, this.escopos.peek()))
-                        throw new SemanticError("Já existe uma variável com este id.");
+                    if(existeSimboloComMesmoId(this.id))
+                        throw new SemanticError("Já existe uma variável com este identificador: ".concat(id));
                     simbolos.add(new Simbolo(this.id, this.tipo, escopos.peek(), false, false));
                 } else {
                     this.tipo = obterTipoPorId(this.id);
@@ -48,9 +48,13 @@ public class Semantico implements Constants
             break;
             case 3: // VETOR
                 this.id = lex;
-                if(existeSimboloComMesmoId(this.id, this.escopos.peek()))
-                    throw new SemanticError("Já existe uma variável com este id.");
-                simbolos.add(new Simbolo(this.id, this.tipo, escopos.peek(), true, false));
+                if(declarando) {
+                    if(existeSimboloComMesmoId(this.id))
+                        throw new SemanticError("Já existe uma variável com este identificador: ".concat(id));
+                    simbolos.add(new Simbolo(this.id, this.tipo, escopos.peek(), true, false));
+                } else {
+                    this.tipo = obterTipoPorId(this.id);
+                }
             break;
             case 4: // ATRIBUICAO
                 if(this.tipo == SemanticTable.ERR)
@@ -96,7 +100,7 @@ public class Semantico implements Constants
                 if(!expr_vetor)
                     expr.push(SemanticTable.STR);
             break;
-            case 13: // ID                
+            case 13: // ID
                 if(!expr_vetor)
                     expr.push(obterTipoPorId(lex));
                 utilizarVariavel(lex);
@@ -151,42 +155,47 @@ public class Semantico implements Constants
         return expr.pop();
     }
     
-    private Integer obterIndiceSimbolo(String id, Pair<String, Integer> escopo) {
-        for (int i = 0; i < simbolos.size(); i++) {
-            Simbolo simbolo = simbolos.get(i);
-            if(simbolo.id.equals(id) 
-            && simbolo.escopo.getKey().equals(escopo.getKey()) 
-            && simbolo.escopo.getValue().equals(escopo.getValue()))
+    private Integer obterIndiceSimbolo(String id, Pair<String, Integer> escopo) throws SemanticError {
+        for (int i = 0; i < this.simbolos.size(); i++) {
+            Simbolo s = this.simbolos.get(i);
+            if(s.id.equals(id)
+                && s.escopo.getKey().equals(escopo.getKey())
+                && s.escopo.getValue().equals(escopo.getValue()))
                 return i;
         }
         return -1;
     }
     
     private Integer obterIndiceSimboloMaisProximo(String id) throws SemanticError {
-        Integer indice = -1;
-        for (int i = 0; i < this.escopos.size(); i++) {
-            indice = obterIndiceSimbolo(id, this.escopos.get(i));
-            if(indice > 0)
+        for (int i = this.escopos.size() - 1; i >= 0; i--) {
+            Integer indice = obterIndiceSimbolo(id, this.escopos.get(i));
+            if(indice >= 0)
                 return indice;
         }
-        throw new SemanticError("Variável não declarada: ".concat(id));
+        return -1;
     }
     
-    private void inicializarVariavel(String id) throws SemanticError {
+    private void inicializarVariavel(String id) throws SemanticError {        
         Integer indice;
         indice = obterIndiceSimboloMaisProximo(id);
+        System.out.println("Inicializar ".concat(id) + " " + indice);
+        if(indice < 0)
+            throw new SemanticError("Variável não declarada: ".concat(id));
         simbolos.get(indice).inicializado = true;
     }   
     
-    private void utilizarVariavel(String id) throws SemanticError {
+    private void utilizarVariavel(String id) throws SemanticError {        
         Integer indice;
         indice = obterIndiceSimboloMaisProximo(id);
+        System.out.println("Utilizar ".concat(id) + " " + indice);
+        if(indice < 0)
+            throw new SemanticError("Variável não declarada: ".concat(id));
         simbolos.get(indice).utilizado = true;
     }
     
     private Integer obterTipoPorId(String id) throws SemanticError {
         Integer indice = obterIndiceSimboloMaisProximo(id);
-        if(indice > 0)
+        if(indice >= 0)
             return simbolos.get(indice).tipo;
         else
             throw new SemanticError("Variável não declarada: ".concat(id));
@@ -208,11 +217,8 @@ public class Semantico implements Constants
         return SemanticTable.ERR;
     }
     
-    private Boolean existeSimboloComMesmoId(String nome, Pair<String, Integer> escopo) {
-        Integer indice = obterIndiceSimbolo(nome, escopo);
-        if(indice > 0)
-            return true;
-        else
-            return false;
+    private Boolean existeSimboloComMesmoId(String id) throws SemanticError {
+        Integer indice = obterIndiceSimboloMaisProximo(id);
+        return (indice >= 0);
     }
 }
