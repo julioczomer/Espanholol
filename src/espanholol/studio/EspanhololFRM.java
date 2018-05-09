@@ -10,10 +10,13 @@ import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.io.File;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.table.DefaultTableModel;
+import symbol.Simbolo;
 
 /**
  *
@@ -69,6 +72,21 @@ public class EspanhololFRM extends javax.swing.JFrame {
         this.getContentPane().revalidate();
 
     }
+    
+    private void preencherTabelaComSimbolos(List<Simbolo> simbolos) {
+        DefaultTableModel modelo = (DefaultTableModel) tabela.getModel();
+        modelo.setRowCount(0);
+        for (Simbolo simbolo : simbolos) {
+            modelo.addRow(new Object[]{
+                simbolo.id,
+                simbolo.getTipo(),
+                simbolo.inicializado,
+                simbolo.utilizado,
+                simbolo.vetor
+            });
+        }
+        tabela.revalidate();
+    }
 
      /**
      * @param afRMMarotageLanguage the fRMMarotageLanguage to set
@@ -93,6 +111,8 @@ public class EspanhololFRM extends javax.swing.JFrame {
         jpResultado = new javax.swing.JPanel();
         abrirBTN = new javax.swing.JButton();
         salvarBTN = new javax.swing.JButton();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        tabela = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("ML - Marotage Language");
@@ -121,11 +141,11 @@ public class EspanhololFRM extends javax.swing.JFrame {
         jpResultado.setLayout(jpResultadoLayout);
         jpResultadoLayout.setHorizontalGroup(
             jpResultadoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 714, Short.MAX_VALUE)
+            .addGap(0, 0, Short.MAX_VALUE)
         );
         jpResultadoLayout.setVerticalGroup(
             jpResultadoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 150, Short.MAX_VALUE)
+            .addGap(0, 115, Short.MAX_VALUE)
         );
 
         abrirBTN.setText("Abrir");
@@ -142,6 +162,31 @@ public class EspanhololFRM extends javax.swing.JFrame {
             }
         });
 
+        tabela.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "ID", "Tipo", "Inicializado", "Utilizado", "Escopo", "Vetor"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.String.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.String.class, java.lang.Boolean.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, false, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jScrollPane2.setViewportView(tabela);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -149,34 +194,41 @@ public class EspanhololFRM extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1)
+                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 341, Short.MAX_VALUE)
-                        .addComponent(salvarBTN)
-                        .addGap(18, 18, 18)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel1)
+                            .addComponent(jScrollPane1))
+                        .addGap(9, 9, 9)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                    .addComponent(jpResultado, javax.swing.GroupLayout.DEFAULT_SIZE, 718, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 444, Short.MAX_VALUE)
                         .addComponent(abrirBTN)
                         .addGap(18, 18, 18)
-                        .addComponent(jbtCompilarExecutar))
-                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jpResultado, javax.swing.GroupLayout.DEFAULT_SIZE, 718, Short.MAX_VALUE))
+                        .addComponent(salvarBTN)
+                        .addGap(17, 17, 17)
+                        .addComponent(jbtCompilarExecutar)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1)
-                    .addComponent(jbtCompilarExecutar)
-                    .addComponent(abrirBTN)
-                    .addComponent(salvarBTN))
+                .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 182, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 191, Short.MAX_VALUE)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel2)
                 .addGap(2, 2, 2)
-                .addComponent(jpResultado, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jpResultado, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(12, 12, 12)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jbtCompilarExecutar)
+                    .addComponent(abrirBTN)
+                    .addComponent(salvarBTN))
                 .addContainerGap())
         );
 
@@ -191,6 +243,8 @@ public class EspanhololFRM extends javax.swing.JFrame {
             Sintatico sin = new Sintatico();
             Semantico sem = new Semantico();
             sin.parse(lex, sem);
+            
+            preencherTabelaComSimbolos(sem.simbolos);
             
             adicionarLog("Código analisado com sucesso.", Color.GREEN);
         } catch (LexicalError | SemanticError |SyntaticError ex) {
@@ -261,10 +315,12 @@ public class EspanhololFRM extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JButton jbtCompilarExecutar;
     private javax.swing.JPanel jpResultado;
     private javax.swing.JTextArea jtaCodigoFonte;
     private javax.swing.JButton salvarBTN;
+    private javax.swing.JTable tabela;
     // End of variables declaration//GEN-END:variables
 
    
