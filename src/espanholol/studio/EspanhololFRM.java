@@ -76,15 +76,17 @@ public class EspanhololFRM extends javax.swing.JFrame {
     private void preencherTabelaComSimbolos(List<Simbolo> simbolos) {
         DefaultTableModel modelo = (DefaultTableModel) tabela.getModel();
         modelo.setRowCount(0);
-        for (Simbolo simbolo : simbolos) {
+        for (int i = simbolos.size() - 1; i >= 0; i--) {
+            Simbolo simbolo = simbolos.get(i);
             modelo.addRow(new Object[]{
                 simbolo.id,
-                simbolo.getTipo(),
+                simbolo.getTipo(),                
                 simbolo.inicializado,
                 simbolo.utilizado,
+                simbolo.escopo,
                 simbolo.vetor
             });
-        }
+        }        
         tabela.revalidate();
     }
 

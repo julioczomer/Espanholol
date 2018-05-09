@@ -10,11 +10,12 @@ package symbol;
  * @author 5966868
  */
 public class Simbolo {
-    public Simbolo(String id, Integer tipo, String escopo, Boolean vetor) {
+    public Simbolo(String id, Integer tipo, String escopo, Boolean vetor, Boolean funcao) {
         this.id = id;
         this.tipo = tipo;
         this.escopo = escopo;
         this.vetor = vetor;
+        this.funcao  = funcao;
         this.inicializado = false;
         this.utilizado = false;
     }
@@ -24,6 +25,7 @@ public class Simbolo {
     public Boolean inicializado;
     public Boolean utilizado;
     public Boolean vetor;
+    public Boolean funcao;
     
     public String getTipo() {
         switch(this.tipo) {
