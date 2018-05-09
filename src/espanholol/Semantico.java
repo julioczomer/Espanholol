@@ -3,6 +3,7 @@ package espanholol;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
+import javafx.util.Pair;
 import symbol.SemanticTable;
 import symbol.Simbolo;
 
@@ -19,12 +20,12 @@ public class Semantico implements Constants
     Stack<Integer> op = new Stack<>();
     
     /* Escopo */
-    Stack<String> escopo = new Stack<>();
-    Integer nivel = 0;
+    Stack<Pair<String, Integer>> escopos = new Stack<>();
+    Integer nivel = 1;
     Boolean escopo_antecipado = false;
     
     public Semantico() {
-        escopo.add("global");
+        escopos.add(new Pair("global", 0));
     }
         
     public void executeAction(int action, Token token) throws SemanticError
@@ -38,26 +39,28 @@ public class Semantico implements Constants
             case 2: // ID
                 this.id = lex;
                 if(declarando) {
-                    if(existeSimboloComMesmoId(this.id, this.escopo.peek()))
+                    if(existeSimboloComMesmoId(this.id, this.escopos.peek()))
                         throw new SemanticError("Já existe uma variável com este id.");
-                    simbolos.add(new Simbolo(this.id, this.tipo, escopo.peek(), false, false));
+                    simbolos.add(new Simbolo(this.id, this.tipo, escopos.peek(), false, false));
                 } else {
-                    this.tipo = obterTipoPorId(this.id, escopo.peek());
+                    this.tipo = obterTipoPorId(this.id);
                 }
             break;
             case 3: // VETOR
                 this.id = lex;
-                if(existeSimboloComMesmoId(this.id, this.escopo.peek()))
+                if(existeSimboloComMesmoId(this.id, this.escopos.peek()))
                     throw new SemanticError("Já existe uma variável com este id.");
-                simbolos.add(new Simbolo(this.id, this.tipo, escopo.peek(), true, false));
+                simbolos.add(new Simbolo(this.id, this.tipo, escopos.peek(), true, false));
             break;
             case 4: // ATRIBUICAO
-                int res = obterResultadoOperacoes();
-                if(res == SemanticTable.ERR)
+                if(this.tipo == SemanticTable.ERR)
+                    throw new SemanticError("Variável não declarada: ".concat(this.id));
+                if(obterResultadoOperacoes() == SemanticTable.ERR)
                     throw new SemanticError("Operação com tipos diferentes");
-                if(obterTipoPorId(this.id, escopo.peek()) != res)
-                    throw new SemanticError("Atribuição de tipos diferentes.");
-                inicializarVariavel(this.id, escopo.peek());
+                if(obterTipoPorId(this.id) == SemanticTable.ERR)
+                    throw new SemanticError("Atribuição de tipos diferentes.");                
+                inicializarVariavel(this.id);
+                this.tipo = SemanticTable.ERR;
             break;
             // OPERACOES
             case 5: // SOMAR
@@ -93,10 +96,10 @@ public class Semantico implements Constants
                 if(!expr_vetor)
                     expr.push(SemanticTable.STR);
             break;
-            case 13: // ID
+            case 13: // ID                
                 if(!expr_vetor)
-                    expr.push(obterTipoPorId(lex, escopo.peek()));
-                utilizarVariavel(lex, escopo.peek());
+                    expr.push(obterTipoPorId(lex));
+                utilizarVariavel(lex);
             break;
             case 14:
                 this.declarando = false;
@@ -107,92 +110,39 @@ public class Semantico implements Constants
             case 16:
                 this.expr_vetor = false;
             break;
-            case 17:
-                this.simbolos.add(new Simbolo(lex, SemanticTable.INT, this.escopo.peek(), false, true));
-                this.escopo.push(lex);
+            case 17: // ESCOPO SUB-ROTINA
+                this.simbolos.add(new Simbolo(lex, SemanticTable.INT, this.escopos.peek(), false, true));
+                this.escopos.push(new Pair(lex, 0));
+                this.nivel = 0;
                 this.escopo_antecipado = true;
             break;
             case 18:
-                if(this.escopo_antecipado)
-                    return;
-                if(this.nivel == 0) {
-                    escopo.add(id);
+                if(this.escopo_antecipado) {
+                    this.escopo_antecipado = false;
                 } else {
-                    String nome = escopo.get(1).concat(this.nivel.toString());
-                    escopo.add(nome);
-                }
+                    this.nivel++;
+                    escopos.push(new Pair(escopos.peek().getKey(), this.nivel));
+                }                
             break;
             case 19:
-                this.escopo_antecipado = false;
-                escopo.pop();
-                if(escopo.peek().equals("global"))
-                    this.nivel = 0;
+                escopos.pop();
             break;
-            /*case 3: // INICIO ESCOPO
-                if(this.nivel == 0) {
-                    escopo.add(id);
-                } else {
-                    String nome = escopo.get(1).concat(this.nivel.toString());
-                    escopo.add(nome);
-                }
+            case 20:
+                if(obterResultadoOperacoes() == SemanticTable.ERR)
+                    throw new SemanticError("Não é permitida operação relacional entre estes tipos");
             break;
-            case 4: // FINAL ESCOPO
-                escopo.pop();
-                if(escopo.peek().equals("global"))
-                    this.nivel = 0;
+            case 21:
+                if(!expr_vetor)
+                    this.op.push(SemanticTable.REL);
             break;
-            // OPERACOES
-            case 5: // SOMAR
-                if(SemanticTable.resultType(expr.pop(), expr.pop(), SemanticTable.SUM) == SemanticTable.ERR)
-                    throw new SemanticError("Não é possível somar estes tipos");
-            break;
-            case 6: // SUBTRAIR
-                if(SemanticTable.resultType(expr.pop(), expr.pop(), SemanticTable.SUB) == SemanticTable.ERR)
-                    throw new SemanticError("Não é possível subtrair estes tipos");
-            break;
-            case 7: // MULTIPLICAR
-                if(SemanticTable.resultType(expr.pop(), expr.pop(), SemanticTable.MUL) == SemanticTable.ERR)
-                    throw new SemanticError("Não é possível multiplicar estes tipos");
-            break;
-            case 8: // DIVIDIR
-                if(SemanticTable.resultType(expr.pop(), expr.pop(), SemanticTable.DIV) == SemanticTable.ERR)
-                    throw new SemanticError("Não é possível dividir estes tipos");
-            break;            
-            // EXPRESSOES
-            case 9: // INT
-                expr.add(SemanticTable.INT);
-            break;
-            case 10: // FLOAT
-                expr.add(SemanticTable.FLO);
-            break;
-            case 11: // CHAR
-                expr.add(SemanticTable.CHA);
-            break;
-            case 12: // STRING
-                expr.add(SemanticTable.STR);
-            break;
-            // ATRIBUIR
-            case 13:
-                if(SemanticTable.atribType(this.tipo, this.expr.pop()) == SemanticTable.ERR)
-                    throw new SemanticError("Atribuição de tipo inválida");
-            break;
-            // FOR
-            case 14:
-                this.id = lex;
-                Integer proxNivel = nivel+1;
-                String escopoFor = escopo.get(1).concat(proxNivel.toString());
-                simbolos.add(new Simbolo(this.id, this.tipo, escopoFor, false));
-            break;*/
         }
     }
     
     private Integer obterResultadoOperacoes() {
-        System.out.println(expr.size() + " " + op.size());
         while(expr.size() >= 2) {
             int t1 = expr.pop();
             int t2 = expr.pop();
             int op = this.op.pop();
-            System.out.println(t1 + " " + t2);
             int res = SemanticTable.resultType(t1, t2, op);
             if(res == SemanticTable.ERR)
                 return SemanticTable.ERR;
@@ -201,30 +151,45 @@ public class Semantico implements Constants
         return expr.pop();
     }
     
-    private Simbolo obterSimbolo(String id, String escopo) {
-        for (Simbolo simbolo : simbolos) {
-            if(simbolo.id.equals(id) && simbolo.escopo.equals(escopo))
-                return simbolo;
+    private Integer obterIndiceSimbolo(String id, Pair<String, Integer> escopo) {
+        for (int i = 0; i < simbolos.size(); i++) {
+            Simbolo simbolo = simbolos.get(i);
+            if(simbolo.id.equals(id) 
+            && simbolo.escopo.getKey().equals(escopo.getKey()) 
+            && simbolo.escopo.getValue().equals(escopo.getValue()))
+                return i;
         }
-        return null;
+        return -1;
     }
     
-    private void inicializarVariavel(String id, String escopo) {
-        for (Simbolo simbolo : simbolos) {
-            if(simbolo.id.equals(id) && simbolo.escopo.equals(escopo))
-                simbolo.inicializado = true;
+    private Integer obterIndiceSimboloMaisProximo(String id) throws SemanticError {
+        Integer indice = -1;
+        for (int i = 0; i < this.escopos.size(); i++) {
+            indice = obterIndiceSimbolo(id, this.escopos.get(i));
+            if(indice > 0)
+                return indice;
         }
+        throw new SemanticError("Variável não declarada: ".concat(id));
     }
     
-    private void utilizarVariavel(String id, String escopo) {
-        for (Simbolo simbolo : simbolos) {
-            if(simbolo.id.equals(id) && simbolo.escopo.equals(escopo))
-                simbolo.utilizado = true;
-        }
+    private void inicializarVariavel(String id) throws SemanticError {
+        Integer indice;
+        indice = obterIndiceSimboloMaisProximo(id);
+        simbolos.get(indice).inicializado = true;
+    }   
+    
+    private void utilizarVariavel(String id) throws SemanticError {
+        Integer indice;
+        indice = obterIndiceSimboloMaisProximo(id);
+        simbolos.get(indice).utilizado = true;
     }
     
-    private Integer obterTipoPorId(String id, String escopo) {
-        return obterSimbolo(id, escopo).tipo;
+    private Integer obterTipoPorId(String id) throws SemanticError {
+        Integer indice = obterIndiceSimboloMaisProximo(id);
+        if(indice > 0)
+            return simbolos.get(indice).tipo;
+        else
+            throw new SemanticError("Variável não declarada: ".concat(id));
     }
     
     private Integer obterTipoEnum(String tipo) {
@@ -243,10 +208,11 @@ public class Semantico implements Constants
         return SemanticTable.ERR;
     }
     
-    private Boolean existeSimboloComMesmoId(String nome, String escopo) {
-        for(Simbolo simbolo : simbolos)
-            if(simbolo.id.equals(nome) && simbolo.escopo.equals(escopo))
-                return true;
-        return false;
+    private Boolean existeSimboloComMesmoId(String nome, Pair<String, Integer> escopo) {
+        Integer indice = obterIndiceSimbolo(nome, escopo);
+        if(indice > 0)
+            return true;
+        else
+            return false;
     }
 }

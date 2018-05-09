@@ -11,8 +11,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.io.File;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.table.DefaultTableModel;
@@ -40,6 +38,8 @@ public class EspanhololFRM extends javax.swing.JFrame {
         //layout.
         jpResultado.setLayout(layout);
         setExtendedState(MAXIMIZED_BOTH);
+        jtaCodigoFonte.setTabSize(4);
+        jtaCodigoFonte.setCaretColor(Color.GREEN);
     }
     
      public static synchronized EspanhololFRM getInstance() {
@@ -76,17 +76,17 @@ public class EspanhololFRM extends javax.swing.JFrame {
     private void preencherTabelaComSimbolos(List<Simbolo> simbolos) {
         DefaultTableModel modelo = (DefaultTableModel) tabela.getModel();
         modelo.setRowCount(0);
-        for (int i = simbolos.size() - 1; i >= 0; i--) {
-            Simbolo simbolo = simbolos.get(i);
+        for (Simbolo simbolo : simbolos) {
             modelo.addRow(new Object[]{
                 simbolo.id,
-                simbolo.getTipo(),                
+                simbolo.getTipo(),
+                simbolo.escopo.getKey().concat(" ").concat(simbolo.escopo.getValue().toString()),                
                 simbolo.inicializado,
-                simbolo.utilizado,
-                simbolo.escopo,
+                simbolo.utilizado,                
+                simbolo.funcao,
                 simbolo.vetor
             });
-        }        
+        }
         tabela.revalidate();
     }
 
@@ -169,14 +169,14 @@ public class EspanhololFRM extends javax.swing.JFrame {
 
             },
             new String [] {
-                "ID", "Tipo", "Inicializado", "Utilizado", "Escopo", "Vetor"
+                "ID", "Tipo", "Escopo", "Inicializado", "Utilizado", "Funcao", "Vetor"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.String.class, java.lang.Boolean.class
+                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Boolean.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false
+                false, false, false, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -188,6 +188,10 @@ public class EspanhololFRM extends javax.swing.JFrame {
             }
         });
         jScrollPane2.setViewportView(tabela);
+        if (tabela.getColumnModel().getColumnCount() > 0) {
+            tabela.getColumnModel().getColumn(2).setResizable(false);
+            tabela.getColumnModel().getColumn(5).setResizable(false);
+        }
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -250,8 +254,8 @@ public class EspanhololFRM extends javax.swing.JFrame {
             
             adicionarLog("Código analisado com sucesso.", Color.GREEN);
         } catch (LexicalError | SemanticError |SyntaticError ex) {
-            Logger.getLogger(EspanhololStudio.class.getName()).log(Level.SEVERE, null, ex);
-            adicionarLog("Erro no código. Deve estar faltando um ;", Color.RED);
+            //Logger.getLogger(EspanhololStudio.class.getName()).log(Level.SEVERE, null, ex);
+            adicionarLog(ex.getMessage(), Color.RED);
         } 
     }//GEN-LAST:event_jbtCompilarExecutarActionPerformed
 

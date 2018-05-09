@@ -5,12 +5,14 @@
  */
 package symbol;
 
+import javafx.util.Pair;
+
 /**
  *
  * @author 5966868
  */
 public class Simbolo {
-    public Simbolo(String id, Integer tipo, String escopo, Boolean vetor, Boolean funcao) {
+    public Simbolo(String id, Integer tipo, Pair<String, Integer> escopo, Boolean vetor, Boolean funcao) {
         this.id = id;
         this.tipo = tipo;
         this.escopo = escopo;
@@ -21,7 +23,7 @@ public class Simbolo {
     }
     public String id;
     public Integer tipo;
-    public String escopo;
+    public Pair<String, Integer> escopo;
     public Boolean inicializado;
     public Boolean utilizado;
     public Boolean vetor;
