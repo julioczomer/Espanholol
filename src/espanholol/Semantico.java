@@ -66,11 +66,11 @@ public class Semantico implements Constants
                     throw new SemanticError("Operação com tipos diferentes");
                 
                 int tipo = obterTipoPorId(this.id);
-                int res = SemanticTable.atribType(expr_res, tipo);
+                int res = SemanticTable.atribType(tipo, expr_res);
                 if(res == SemanticTable.ERR)
                     throw new SemanticError("Atribuição de tipos diferentes.");
                 else if(res == SemanticTable.WAR)
-                    this.warnings.add("Atribuição de " + SemanticTable.getTypeName(expr_res) + " para " + SemanticTable.getTypeName(res));
+                    this.warnings.add("Atribuição de " + SemanticTable.getTypeName(expr_res) + " para " + SemanticTable.getTypeName(tipo));
                 
                 inicializarVariavel(this.id);
             break;
