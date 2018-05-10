@@ -53,4 +53,27 @@ public class SemanticTable {
    public static int atribType (int TP1, int TP2){
       return (atribTable[TP1][TP2]);
    }
+   
+   public static String getOperatorName(int operator) {
+       switch(operator) {
+           case SUM: return "soma";
+           case SUB: return "subtração";
+           case DIV: return "divisão";
+           case MUL: return "multiplicação";
+           case REL: return "relação";
+       }
+       return "";
+   }
+   
+   public static String getTypeName(Integer type) {
+        switch(type) {
+            case SemanticTable.INT: return "INT";
+            case SemanticTable.FLO: return "FLOAT";
+            case SemanticTable.CHA: return "CHAR";
+            case SemanticTable.STR: return "STRING";
+            case SemanticTable.BOO: return "BOOLEAN";
+            case SemanticTable.VOI: return "VOID";
+        }
+        return "";
+    }
 }

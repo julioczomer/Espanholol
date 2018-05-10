@@ -250,6 +250,9 @@ public class EspanhololFRM extends javax.swing.JFrame {
             Semantico sem = new Semantico();
             sin.parse(lex, sem);
             
+            for (String war : sem.warnings)
+                adicionarLog(war, Color.YELLOW);
+            
             preencherTabelaComSimbolos(sem.simbolos);
             
             adicionarLog("Código analisado com sucesso.", Color.GREEN);

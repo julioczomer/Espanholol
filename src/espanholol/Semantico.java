@@ -9,6 +9,8 @@ import symbol.Simbolo;
 
 public class Semantico implements Constants
 {
+    public List<String> warnings = new ArrayList<>();
+    
     public List<Simbolo> simbolos = new ArrayList<>();
     Integer tipo;
     String id;
@@ -59,12 +61,18 @@ public class Semantico implements Constants
             case 4: // ATRIBUICAO
                 if(this.tipo == SemanticTable.ERR)
                     throw new SemanticError("Variável não declarada: ".concat(this.id));
-                if(obterResultadoOperacoes() == SemanticTable.ERR)
+                int expr_res = obterResultadoOperacoes();
+                if(expr_res == SemanticTable.ERR)
                     throw new SemanticError("Operação com tipos diferentes");
-                if(obterTipoPorId(this.id) == SemanticTable.ERR)
-                    throw new SemanticError("Atribuição de tipos diferentes.");                
+                
+                int tipo = obterTipoPorId(this.id);
+                int res = SemanticTable.atribType(expr_res, tipo);
+                if(res == SemanticTable.ERR)
+                    throw new SemanticError("Atribuição de tipos diferentes.");
+                else if(res == SemanticTable.WAR)
+                    this.warnings.add("Atribuição de " + SemanticTable.getTypeName(expr_res) + " para " + SemanticTable.getTypeName(res));
+                
                 inicializarVariavel(this.id);
-                this.tipo = SemanticTable.ERR;
             break;
             // OPERACOES
             case 5: // SOMAR
@@ -107,6 +115,7 @@ public class Semantico implements Constants
             break;
             case 14:
                 this.declarando = false;
+                this.tipo = SemanticTable.ERR;
             break;       
             case 15:
                 this.expr_vetor = true;
@@ -163,6 +172,10 @@ public class Semantico implements Constants
             int res = SemanticTable.resultType(t1, t2, op);
             if(res == SemanticTable.ERR)
                 return SemanticTable.ERR;
+            else if(res == SemanticTable.WAR)
+                this.warnings.add("Operação de " + SemanticTable.getOperatorName(op) + 
+                                  " entre " + SemanticTable.getTypeName(t1) +
+                                  " e " + SemanticTable.getTypeName(t2));
             expr.push(res);
         }
         return expr.pop();
