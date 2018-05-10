@@ -36,6 +36,7 @@ public class Simbolo {
             case SemanticTable.CHA: return "CHAR";
             case SemanticTable.STR: return "STRING";
             case SemanticTable.BOO: return "BOOLEAN";
+            case SemanticTable.VOI: return "VOID";
         }
         return "";
     }

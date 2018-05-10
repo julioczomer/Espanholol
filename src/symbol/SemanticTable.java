@@ -17,6 +17,7 @@ public class SemanticTable {
    public static final int CHA = 2;
    public static final int STR = 3;
    public static final int BOO = 4;
+   public static final int VOI = 5;
 
    public static final int SUM = 0;
    public static final int SUB = 1;

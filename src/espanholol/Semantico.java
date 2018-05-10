@@ -115,7 +115,10 @@ public class Semantico implements Constants
                 this.expr_vetor = false;
             break;
             case 17: // ESCOPO SUB-ROTINA
-                this.simbolos.add(new Simbolo(lex, SemanticTable.INT, this.escopos.peek(), false, true));
+                if(lex.equals("mayor"))
+                    this.simbolos.add(new Simbolo(lex, SemanticTable.INT, this.escopos.peek(), false, true));
+                else
+                    this.simbolos.add(new Simbolo(lex, this.tipo, this.escopos.peek(), false, true));
                 this.escopos.push(new Pair(lex, 0));
                 this.nivel = 0;
                 this.escopo_antecipado = true;
@@ -138,6 +141,16 @@ public class Semantico implements Constants
             case 21:
                 if(!expr_vetor)
                     this.op.push(SemanticTable.REL);
+            break;
+            case 22:
+                this.escopo_antecipado = true;
+                this.nivel++;
+                this.escopos.push(new Pair(escopos.peek().getKey(), this.nivel));                
+            break;
+            case 23:
+                this.declarando = false;
+                if(obterResultadoOperacoes() == SemanticTable.ERR)
+                    throw new SemanticError("Não é permitida operação relacional entre estes tipos");
             break;
         }
     }
@@ -178,7 +191,6 @@ public class Semantico implements Constants
     private void inicializarVariavel(String id) throws SemanticError {        
         Integer indice;
         indice = obterIndiceSimboloMaisProximo(id);
-        System.out.println("Inicializar ".concat(id) + " " + indice);
         if(indice < 0)
             throw new SemanticError("Variável não declarada: ".concat(id));
         simbolos.get(indice).inicializado = true;
@@ -187,7 +199,6 @@ public class Semantico implements Constants
     private void utilizarVariavel(String id) throws SemanticError {        
         Integer indice;
         indice = obterIndiceSimboloMaisProximo(id);
-        System.out.println("Utilizar ".concat(id) + " " + indice);
         if(indice < 0)
             throw new SemanticError("Variável não declarada: ".concat(id));
         simbolos.get(indice).utilizado = true;
@@ -213,6 +224,8 @@ public class Semantico implements Constants
                 return SemanticTable.STR;
             case "bool":
                 return SemanticTable.BOO;
+            case "vacio":
+                return SemanticTable.VOI;
         }
         return SemanticTable.ERR;
     }
