@@ -7,12 +7,18 @@ package espanholol.studio;
 
 import espanholol.*;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.io.File;
 import java.util.List;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JScrollPane;
+import javax.swing.ListCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import symbol.Simbolo;
 
@@ -25,6 +31,7 @@ public class EspanhololFRM extends javax.swing.JFrame {
     
     private static int cont = 0;
     private static EspanhololFRM fRMMarotageLanguage;
+    private DefaultListModel list = new DefaultListModel();
     
     /**
      * Creates new form MarotageFRM
@@ -33,13 +40,26 @@ public class EspanhololFRM extends javax.swing.JFrame {
         initComponents();
         jtaCodigoFonte.setForeground(Color.GREEN);
         jtaCodigoFonte.setBackground(Color.BLACK);
-        GridBagLayout layout = new GridBagLayout();
-        layout.columnWidths = new int[] {200, 1};
-        //layout.
-        jpResultado.setLayout(layout);
+        
         setExtendedState(MAXIMIZED_BOTH);
         jtaCodigoFonte.setTabSize(4);
-        jtaCodigoFonte.setCaretColor(Color.GREEN);
+        jtaCodigoFonte.setCaretColor(Color.GREEN);        
+        //jpResultado.setLayout(new GridBagLayout());
+        jsaida.setCellRenderer(new DefaultListCellRenderer() {
+
+            @Override
+            public Component getListCellRendererComponent(JList list, Object value, int index,
+                      boolean isSelected, boolean cellHasFocus) {
+                 Component c = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                 if (value instanceof String)
+                    if(((String) value).contains("WAR"))
+                          setForeground(Color.yellow);
+                    if(((String) value).contains("ERR"))
+                          setForeground(Color.RED);
+                 return c;
+            }
+
+       });
     }
     
      public static synchronized EspanhololFRM getInstance() {
@@ -59,21 +79,30 @@ public class EspanhololFRM extends javax.swing.JFrame {
     }
     
     public void adicionarLog(String texto, Color cor){
-        int id = jpResultado.getComponentCount();
-        JLabel label = new JLabel("[" + id + "] " + texto);
+        String id = "SUC";
+        if(cor == Color.YELLOW)
+            id = "WAR";
+        if(cor == Color.RED)
+            id = "ERR";
+        
+        JLabel label = new JLabel(id + " " + texto);
         label.setForeground(cor);
-        GridBagConstraints c = new GridBagConstraints();
-        c.gridy = id;
-        c.anchor = GridBagConstraints.WEST;
+        /*GridBagConstraints c = new GridBagConstraints();
+        c.gridy = jpResultado.getComponentCount();
+        c.anchor = GridBagConstraints.LINE_START;
         c.fill = GridBagConstraints.VERTICAL;
         
         jpResultado.add(label, c);
-        jpResultado.revalidate();
+        
+        jpResultado.revalidate();*/        
+        list.addElement(id + " " + texto);        
+        jsaida.setModel(list);
+        jsaida.revalidate();
         this.getContentPane().revalidate();
 
     }
     
-    private void preencherTabelaComSimbolos(List<Simbolo> simbolos) {
+    private void preencherTabelaComSimbolos(List<Simbolo> simbolos) {       
         DefaultTableModel modelo = (DefaultTableModel) tabela.getModel();
         modelo.setRowCount(0);
         for (Simbolo simbolo : simbolos) {
@@ -111,11 +140,12 @@ public class EspanhololFRM extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         jbtCompilarExecutar = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
-        jpResultado = new javax.swing.JPanel();
         abrirBTN = new javax.swing.JButton();
         salvarBTN = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         tabela = new javax.swing.JTable();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        jsaida = new javax.swing.JList<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("ML - Marotage Language");
@@ -134,22 +164,6 @@ public class EspanhololFRM extends javax.swing.JFrame {
         });
 
         jLabel2.setText("Saída");
-
-        jpResultado.setBackground(new java.awt.Color(0, 0, 0));
-        jpResultado.setForeground(new java.awt.Color(255, 255, 255));
-        jpResultado.setEnabled(false);
-        jpResultado.setPreferredSize(new java.awt.Dimension(0, 150));
-
-        javax.swing.GroupLayout jpResultadoLayout = new javax.swing.GroupLayout(jpResultado);
-        jpResultado.setLayout(jpResultadoLayout);
-        jpResultadoLayout.setHorizontalGroup(
-            jpResultadoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
-        );
-        jpResultadoLayout.setVerticalGroup(
-            jpResultadoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 115, Short.MAX_VALUE)
-        );
 
         abrirBTN.setText("Abrir");
         abrirBTN.addActionListener(new java.awt.event.ActionListener() {
@@ -194,6 +208,10 @@ public class EspanhololFRM extends javax.swing.JFrame {
             tabela.getColumnModel().getColumn(6).setResizable(false);
         }
 
+        jsaida.setBackground(new java.awt.Color(0, 0, 0));
+        jsaida.setForeground(new java.awt.Color(0, 255, 0));
+        jScrollPane3.setViewportView(jsaida);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -201,6 +219,7 @@ public class EspanhololFRM extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane3)
                     .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -208,7 +227,6 @@ public class EspanhololFRM extends javax.swing.JFrame {
                             .addComponent(jScrollPane1))
                         .addGap(9, 9, 9)
                         .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
-                    .addComponent(jpResultado, javax.swing.GroupLayout.DEFAULT_SIZE, 718, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(0, 444, Short.MAX_VALUE)
                         .addComponent(abrirBTN)
@@ -225,13 +243,13 @@ public class EspanhololFRM extends javax.swing.JFrame {
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 191, Short.MAX_VALUE)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 207, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel2)
-                .addGap(2, 2, 2)
-                .addComponent(jpResultado, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(12, 12, 12)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jbtCompilarExecutar)
                     .addComponent(abrirBTN)
@@ -244,12 +262,18 @@ public class EspanhololFRM extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jbtCompilarExecutarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtCompilarExecutarActionPerformed
+        /*jpResultado.removeAll();
+        jpResultado.revalidate();*/
+        list.clear();
+        jsaida.revalidate();
+        this.getContentPane().revalidate();
+
+        String texto = jtaCodigoFonte.getText();
+        Lexico lex = new Lexico(texto);
+        Sintatico sin = new Sintatico();
+        Semantico sem = new Semantico();
         try {
-            jpResultado.removeAll();
-            String texto = jtaCodigoFonte.getText();
-            Lexico lex = new Lexico(texto);
-            Sintatico sin = new Sintatico();
-            Semantico sem = new Semantico();
+            
             sin.parse(lex, sem);
             
             
@@ -259,9 +283,13 @@ public class EspanhololFRM extends javax.swing.JFrame {
             
             preencherTabelaComSimbolos(sem.simbolos);
                         
-            adicionarLog("Código analisado com sucesso.", Color.GREEN);
+            adicionarLog("Código analisado com sucesso.", Color.GREEN);            
         } catch (LexicalError | SemanticError |SyntaticError ex) {
             //Logger.getLogger(EspanhololStudio.class.getName()).log(Level.SEVERE, null, ex);
+            
+            sem.obterSimbolosNaoUtilizadosInicializados();
+            for (String war : sem.warnings)
+                adicionarLog(war, Color.YELLOW);
             adicionarLog(ex.getMessage(), Color.RED);
         } 
     }//GEN-LAST:event_jbtCompilarExecutarActionPerformed
@@ -329,8 +357,9 @@ public class EspanhololFRM extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JButton jbtCompilarExecutar;
-    private javax.swing.JPanel jpResultado;
+    private javax.swing.JList<String> jsaida;
     private javax.swing.JTextArea jtaCodigoFonte;
     private javax.swing.JButton salvarBTN;
     private javax.swing.JTable tabela;

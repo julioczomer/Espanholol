@@ -119,13 +119,12 @@ public class Semantico implements Constants
                 if(expr_vetor == 0)
                     expr.push(SemanticTable.STR);
             break;
-            case 13: // ID
-                System.out.println(lex + " " + expr_vetor);
+            case 13: // ID                
                 if(expr_vetor == 0)
                     expr.push(obterTipoPorId(lex));
                 int indice = obterIndiceSimboloMaisProximo(lex);
                 Simbolo sim = this.simbolos.get(indice);
-                if(!sim.funcao && !sim.inicializado)
+                if(!sim.funcao && !sim.inicializado && sim.parametro == 0)
                     this.warnings.add(lex.concat(" em " + sim.escopo.getKey() + " ainda não foi inicializado."));
                 utilizarVariavel(lex);
             break;
