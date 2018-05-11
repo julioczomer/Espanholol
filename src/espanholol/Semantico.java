@@ -12,10 +12,13 @@ public class Semantico implements Constants
     public List<String> warnings = new ArrayList<>();
     
     public List<Simbolo> simbolos = new ArrayList<>();
+    public List<Simbolo> pendentes = new ArrayList<>();
     Integer tipo;
     String id;
+    Integer ordem;
+    Boolean parametro = false;
     Boolean declarando = false;
-    Boolean expr_vetor = false;
+    Integer expr_vetor = 0;
     
     /* Expressões */
     Stack<Integer> expr = new Stack<>();
@@ -41,9 +44,11 @@ public class Semantico implements Constants
             case 2: // ID
                 this.id = lex;
                 if(declarando) {
+                    if(this.parametro)
+                        this.ordem++;
                     if(existeSimboloComMesmoId(this.id))
-                        throw new SemanticError("Já existe uma variável com este identificador: ".concat(id));
-                    simbolos.add(new Simbolo(this.id, this.tipo, escopos.peek(), false, false));
+                        throw new SemanticError("Já existe uma variável com este identificador: ".concat(id));                   
+                    pendentes.add(new Simbolo(this.id, this.tipo, escopos.peek(), this.ordem, false, false));
                 } else {
                     this.tipo = obterTipoPorId(this.id);
                 }
@@ -51,21 +56,25 @@ public class Semantico implements Constants
             case 3: // VETOR
                 this.id = lex;
                 if(declarando) {
+                    if(this.parametro)
+                        this.ordem++;
                     if(existeSimboloComMesmoId(this.id))
                         throw new SemanticError("Já existe uma variável com este identificador: ".concat(id));
-                    simbolos.add(new Simbolo(this.id, this.tipo, escopos.peek(), true, false));
+                    pendentes.add(new Simbolo(this.id, this.tipo, escopos.peek(), this.ordem, true, false));
                 } else {
                     this.tipo = obterTipoPorId(this.id);
                 }
             break;
             case 4: // ATRIBUICAO
-                if(this.tipo == SemanticTable.ERR)
+                simbolos.addAll(pendentes);                
+                
+                int tipo = obterTipoPorId(this.id);
+                if(tipo == SemanticTable.ERR)
                     throw new SemanticError("Variável não declarada: ".concat(this.id));
                 int expr_res = obterResultadoOperacoes();
                 if(expr_res == SemanticTable.ERR)
                     throw new SemanticError("Operação com tipos diferentes");
                 
-                int tipo = obterTipoPorId(this.id);
                 int res = SemanticTable.atribType(tipo, expr_res);
                 if(res == SemanticTable.ERR)
                     throw new SemanticError("Atribuição de tipos diferentes.");
@@ -73,44 +82,51 @@ public class Semantico implements Constants
                     this.warnings.add("Atribuição de " + SemanticTable.getTypeName(expr_res) + " para " + SemanticTable.getTypeName(tipo));
                 
                 inicializarVariavel(this.id);
+                
+                pendentes.clear();
             break;
             // OPERACOES
             case 5: // SOMAR
-                if(!expr_vetor)
+                if(expr_vetor == 0)
                     op.push(SemanticTable.SUM);
             break;
             case 6: // SUBTRAIR
-                if(!expr_vetor)
+                if(expr_vetor == 0)
                     op.push(SemanticTable.SUB);                
             break;
             case 7: // MULTIPLICAR
-                if(!expr_vetor)
+                if(expr_vetor == 0)
                     op.push(SemanticTable.MUL);
             break;
             case 8: // DIVIDIR
-                if(!expr_vetor)
+                if(expr_vetor == 0)
                     op.push(SemanticTable.DIV);
             break;            
             // EXPRESSOES
             case 9: // INT                
-                if(!expr_vetor)
+                if(expr_vetor == 0)
                     expr.push(SemanticTable.INT);
             break;
             case 10: // FLOAT
-                if(!expr_vetor)
+                if(expr_vetor == 0)
                     expr.push(SemanticTable.FLO);
             break;
             case 11: // CHAR
-                if(!expr_vetor)
+                if(expr_vetor == 0)
                     expr.push(SemanticTable.CHA);
             break;
             case 12: // STRING
-                if(!expr_vetor)
+                if(expr_vetor == 0)
                     expr.push(SemanticTable.STR);
             break;
             case 13: // ID
-                if(!expr_vetor)
+                System.out.println(lex + " " + expr_vetor);
+                if(expr_vetor == 0)
                     expr.push(obterTipoPorId(lex));
+                int indice = obterIndiceSimboloMaisProximo(lex);
+                Simbolo sim = this.simbolos.get(indice);
+                if(!sim.funcao && !sim.inicializado)
+                    this.warnings.add(lex.concat(" em " + sim.escopo.getKey() + " ainda não foi inicializado."));
                 utilizarVariavel(lex);
             break;
             case 14:
@@ -118,16 +134,17 @@ public class Semantico implements Constants
                 this.tipo = SemanticTable.ERR;
             break;       
             case 15:
-                this.expr_vetor = true;
+                this.expr_vetor++;
             break;
             case 16:
-                this.expr_vetor = false;
+                this.expr_vetor--;
             break;
             case 17: // ESCOPO SUB-ROTINA
+                this.ordem = 0;
                 if(lex.equals("mayor"))
-                    this.simbolos.add(new Simbolo(lex, SemanticTable.INT, this.escopos.peek(), false, true));
+                    this.simbolos.add(new Simbolo(lex, SemanticTable.INT, this.escopos.peek(), this.ordem, false, true));
                 else
-                    this.simbolos.add(new Simbolo(lex, this.tipo, this.escopos.peek(), false, true));
+                    this.simbolos.add(new Simbolo(lex, this.tipo, this.escopos.peek(), this.ordem, false, true));
                 this.escopos.push(new Pair(lex, 0));
                 this.nivel = 0;
                 this.escopo_antecipado = true;
@@ -138,7 +155,7 @@ public class Semantico implements Constants
                 } else {
                     this.nivel++;
                     escopos.push(new Pair(escopos.peek().getKey(), this.nivel));
-                }                
+                }
             break;
             case 19:
                 escopos.pop();
@@ -148,7 +165,7 @@ public class Semantico implements Constants
                     throw new SemanticError("Não é permitida operação relacional entre estes tipos");
             break;
             case 21:
-                if(!expr_vetor)
+                if(expr_vetor == 0)
                     this.op.push(SemanticTable.REL);
             break;
             case 22:
@@ -160,6 +177,16 @@ public class Semantico implements Constants
                 this.declarando = false;
                 if(obterResultadoOperacoes() == SemanticTable.ERR)
                     throw new SemanticError("Não é permitida operação relacional entre estes tipos");
+            break;
+            case 24:
+                simbolos.addAll(pendentes);
+                this.ordem = 0;
+                this.parametro = false;                
+                pendentes.clear();
+            break;
+            case 25:
+                this.parametro = true;
+                this.ordem = 0;
             break;
         }
     }
@@ -246,5 +273,14 @@ public class Semantico implements Constants
     private Boolean existeSimboloComMesmoId(String id) throws SemanticError {
         Integer indice = obterIndiceSimboloMaisProximo(id);
         return (indice >= 0);
+    }       
+    
+    public void obterSimbolosNaoUtilizadosInicializados() {
+        for (Simbolo simbolo : this.simbolos) {
+            if(simbolo.funcao)
+                continue;
+            if(!simbolo.utilizado)
+                this.warnings.add(simbolo.id.concat(" em " + simbolo.escopo.getKey() + " não utilizado."));
+        }
     }
 }

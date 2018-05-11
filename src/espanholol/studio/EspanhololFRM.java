@@ -83,6 +83,7 @@ public class EspanhololFRM extends javax.swing.JFrame {
                 simbolo.escopo.getKey().concat(" ").concat(simbolo.escopo.getValue().toString()),                
                 simbolo.inicializado,
                 simbolo.utilizado,                
+                simbolo.parametro,
                 simbolo.funcao,
                 simbolo.vetor
             });
@@ -169,14 +170,14 @@ public class EspanhololFRM extends javax.swing.JFrame {
 
             },
             new String [] {
-                "ID", "Tipo", "Escopo", "Inicializado", "Utilizado", "Funcao", "Vetor"
+                "ID", "Tipo", "Escopo", "Inicializado", "Utilizado", "Parametro", "Funcao", "Vetor"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Boolean.class
+                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.Boolean.class, java.lang.Boolean.class, java.lang.Integer.class, java.lang.Boolean.class, java.lang.Boolean.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, false
+                false, false, false, false, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -190,7 +191,7 @@ public class EspanhololFRM extends javax.swing.JFrame {
         jScrollPane2.setViewportView(tabela);
         if (tabela.getColumnModel().getColumnCount() > 0) {
             tabela.getColumnModel().getColumn(2).setResizable(false);
-            tabela.getColumnModel().getColumn(5).setResizable(false);
+            tabela.getColumnModel().getColumn(6).setResizable(false);
         }
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -244,17 +245,20 @@ public class EspanhololFRM extends javax.swing.JFrame {
 
     private void jbtCompilarExecutarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtCompilarExecutarActionPerformed
         try {
+            jpResultado.removeAll();
             String texto = jtaCodigoFonte.getText();
             Lexico lex = new Lexico(texto);
             Sintatico sin = new Sintatico();
             Semantico sem = new Semantico();
             sin.parse(lex, sem);
             
+            
+            sem.obterSimbolosNaoUtilizadosInicializados();
             for (String war : sem.warnings)
                 adicionarLog(war, Color.YELLOW);
             
             preencherTabelaComSimbolos(sem.simbolos);
-            
+                        
             adicionarLog("Código analisado com sucesso.", Color.GREEN);
         } catch (LexicalError | SemanticError |SyntaticError ex) {
             //Logger.getLogger(EspanhololStudio.class.getName()).log(Level.SEVERE, null, ex);

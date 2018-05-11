@@ -12,10 +12,11 @@ import javafx.util.Pair;
  * @author 5966868
  */
 public class Simbolo {
-    public Simbolo(String id, Integer tipo, Pair<String, Integer> escopo, Boolean vetor, Boolean funcao) {
+    public Simbolo(String id, Integer tipo, Pair<String, Integer> escopo, Integer parametro, Boolean vetor, Boolean funcao) {
         this.id = id;
         this.tipo = tipo;
         this.escopo = escopo;
+        this.parametro = parametro;
         this.vetor = vetor;
         this.funcao  = funcao;
         this.inicializado = false;
@@ -26,6 +27,7 @@ public class Simbolo {
     public Pair<String, Integer> escopo;
     public Boolean inicializado;
     public Boolean utilizado;
+    public Integer parametro;
     public Boolean vetor;
     public Boolean funcao;
     
