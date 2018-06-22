@@ -47,7 +47,9 @@
                       <Component id="jScrollPane2" pref="0" max="32767" attributes="0"/>
                   </Group>
                   <Group type="102" alignment="1" attributes="0">
-                      <EmptySpace min="0" pref="444" max="32767" attributes="0"/>
+                      <EmptySpace min="10" pref="10" max="-2" attributes="0"/>
+                      <Component id="botaoAsm" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace pref="349" max="32767" attributes="0"/>
                       <Component id="abrirBTN" min="-2" max="-2" attributes="0"/>
                       <EmptySpace type="separate" max="-2" attributes="0"/>
                       <Component id="salvarBTN" min="-2" max="-2" attributes="0"/>
@@ -79,6 +81,7 @@
                   <Component id="jbtCompilarExecutar" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="abrirBTN" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="salvarBTN" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="botaoAsm" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
@@ -247,5 +250,13 @@
         </Component>
       </SubComponents>
     </Container>
+    <Component class="javax.swing.JButton" name="botaoAsm">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Salvar Asm"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="botaoAsmActionPerformed"/>
+      </Events>
+    </Component>
   </SubComponents>
 </Form>

@@ -151,6 +151,7 @@ public class EspanhololFRM extends javax.swing.JFrame {
         jsaida = new javax.swing.JList<>();
         jScrollPane4 = new javax.swing.JScrollPane();
         assembly = new javax.swing.JTextArea();
+        botaoAsm = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("ML - Marotage Language");
@@ -221,6 +222,13 @@ public class EspanhololFRM extends javax.swing.JFrame {
         assembly.setRows(5);
         jScrollPane4.setViewportView(assembly);
 
+        botaoAsm.setText("Salvar Asm");
+        botaoAsm.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                botaoAsmActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -242,7 +250,9 @@ public class EspanhololFRM extends javax.swing.JFrame {
                                 .addGap(10, 10, 10)))
                         .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 444, Short.MAX_VALUE)
+                        .addGap(10, 10, 10)
+                        .addComponent(botaoAsm)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 349, Short.MAX_VALUE)
                         .addComponent(abrirBTN)
                         .addGap(18, 18, 18)
                         .addComponent(salvarBTN)
@@ -268,7 +278,8 @@ public class EspanhololFRM extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jbtCompilarExecutar)
                     .addComponent(abrirBTN)
-                    .addComponent(salvarBTN))
+                    .addComponent(salvarBTN)
+                    .addComponent(botaoAsm))
                 .addContainerGap())
         );
 
@@ -327,6 +338,16 @@ public class EspanhololFRM extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_salvarBTNActionPerformed
 
+    private void botaoAsmActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botaoAsmActionPerformed
+        final JFileChooser fc = new JFileChooser();
+        int option = fc.showOpenDialog(this);
+        if (option == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = fc.getSelectedFile();
+            String path = selectedFile.getAbsolutePath();
+            FileIOManager.createFileAndWrite(path, assembly.getText());
+        }
+    }//GEN-LAST:event_botaoAsmActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -366,6 +387,7 @@ public class EspanhololFRM extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton abrirBTN;
     private javax.swing.JTextArea assembly;
+    private javax.swing.JButton botaoAsm;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JScrollPane jScrollPane1;

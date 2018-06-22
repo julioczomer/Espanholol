@@ -38,6 +38,7 @@ public class Semantico implements Constants
     Boolean vet_lado_esquerdo_resolvido = false;
     Boolean primeira_expr_vetor = true;
     Boolean operando_vetor = false;
+    Boolean imprimir_vetor = false;
     
     public Semantico() {
         escopos.push(new Pair("global", 0));
@@ -98,9 +99,10 @@ public class Semantico implements Constants
                 pendentes.clear();
                 
                 if(vet_lado_esquerdo) {
+                    System.out.println("AAAAAAAAAAAAAAAAA");
                     assemblies.add("STO 1001");
                     assemblies.add("LD 1000");
-                    assemblies.add("STO $indr");                    
+                    assemblies.add("STO $indr");
                     assemblies.add("LD 1001");
                     assemblies.add("STOV ".concat(this.id));
                 } else {
@@ -143,7 +145,7 @@ public class Semantico implements Constants
                         this.assemblies.add("LDI ".concat(lex));
                         primeira_expr_vetor = false;
                     } else {
-                        this.assemblies.add(getAssemblyInstruction(op_vector).concat(" ").concat(lex));
+                        this.assemblies.add(getAssemblyInstruction(op_vector).concat("I ").concat(lex));
                     }
                 }
             break;
@@ -179,7 +181,7 @@ public class Semantico implements Constants
                         addInstrucaoAssembly(-1, lex, true);
                         primeira_expr_vetor = false;
                     } else {
-                        addInstrucaoAssembly(op_vector, lex, true);
+                        assemblies.add(getAssemblyInstruction(op_vector).concat(" ").concat(lex));                        
                     }
                 }                
             break;
@@ -198,8 +200,14 @@ public class Semantico implements Constants
                     assemblies.add("STO 1000");
                     vet_lado_esquerdo_resolvido = true;
                 } else if(primeira_expr) {
-                    assemblies.add("STO $indr");
-                    assemblies.add("LDV ".concat(id_vetor));
+                    assemblies.add("STO $indr");                    
+                    if(imprimir_vetor) {
+                        assemblies.add("LD $in_port");
+                        assemblies.add("STOV ".concat(id_vetor));
+                        this.imprimir_vetor = false;
+                    } else {
+                        assemblies.add("LDV ".concat(id_vetor));
+                    }
                     primeira_expr = false;
                 } else {
                     assemblies.add("STO $indr");
@@ -278,8 +286,7 @@ public class Semantico implements Constants
                 this.op.clear();
                 this.expr.clear();
                 primeira_expr = true;
-                this.operando_vetor = false;
-                this.vet_lado_esquerdo = false;
+                this.operando_vetor = false;                
             break;
             case 28:
                 if(expr_vetor == 0)
@@ -293,13 +300,18 @@ public class Semantico implements Constants
                 else
                     op_vector = SemanticTable.SRT;
             break;
-            // CIN
-            case 30:
-                assemblies.add("LD $in_port");
-                assemblies.add("STO ".concat(lex));
+            case 30: // CIN
+                this.primeira_expr = true;
+                this.vet_lado_esquerdo = false;
+                if(simbolos.get(obterIndiceSimboloMaisProximo(lex)).vetor) {
+                    id_vetor = lex;
+                    this.imprimir_vetor = true;
+                } else {
+                    assemblies.add("LD $in_port");
+                    assemblies.add("STO ".concat(lex));
+                }
             break;
-            // COUT
-            case 31:
+            case 31: // COUT
                 assemblies.add("STO $out_port");
             break;
         }

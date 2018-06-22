@@ -8,7 +8,7 @@ SemanticName = Semantico
 Package = espanholol
 ScannerCaseSensitive = true
 ScannerTable = Full
-Input = Stream
+Input = String
 Parser = SLR
 #RegularDefinitions
 NUMEROS:    [0-9]
@@ -179,7 +179,8 @@ ENTRADA: "->"
 	| <DESVIO> | <FOR> | <WHILE> | <RETURN> | <CHAMADA_FUNCAO> PONTO_VIRGULA | <IO> | <COMENTARIO>;
 <COMENTARIO> ::= COMENTARIO_LINHA | COMENTARIO_LINHAS;
 
-<IO> ::= CIN ENTRADA ID #30 PONTO_VIRGULA | COUT <COUT> PONTO_VIRGULA;
+<IO> ::= CIN ENTRADA ID #30 PONTO_VIRGULA | CIN ENTRADA ID #30 ABRE_COLCHETES #15 <exp> FECHA_COLCHETES #16 PONTO_VIRGULA 
+	| COUT <COUT> PONTO_VIRGULA;
 <COUT> ::= <COUT> SAIDA <exp> #31 | SAIDA <exp> #31;
 
 <LISTA_IDS> ::= <LISTA_IDS> VIRGULA <exp> | <exp>;
