@@ -293,6 +293,15 @@ public class Semantico implements Constants
                 else
                     op_vector = SemanticTable.SRT;
             break;
+            // CIN
+            case 30:
+                assemblies.add("LD $in_port");
+                assemblies.add("STO ".concat(lex));
+            break;
+            // COUT
+            case 31:
+                assemblies.add("STO $out_port");
+            break;
         }
     }
     
