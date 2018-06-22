@@ -8,8 +8,6 @@ package espanholol.studio;
 import espanholol.*;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.io.File;
 import java.util.List;
 import javax.swing.DefaultListCellRenderer;
@@ -17,8 +15,6 @@ import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JList;
-import javax.swing.JScrollPane;
-import javax.swing.ListCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import symbol.Simbolo;
 
@@ -87,14 +83,6 @@ public class EspanhololFRM extends javax.swing.JFrame {
         
         JLabel label = new JLabel(id + " " + texto);
         label.setForeground(cor);
-        /*GridBagConstraints c = new GridBagConstraints();
-        c.gridy = jpResultado.getComponentCount();
-        c.anchor = GridBagConstraints.LINE_START;
-        c.fill = GridBagConstraints.VERTICAL;
-        
-        jpResultado.add(label, c);
-        
-        jpResultado.revalidate();*/        
         list.addElement(id + " " + texto);        
         jsaida.setModel(list);
         jsaida.revalidate();
@@ -102,9 +90,10 @@ public class EspanhololFRM extends javax.swing.JFrame {
 
     }
     
-    private void preencherTabelaComSimbolos(List<Simbolo> simbolos) {       
+    private void preencherTabelaComSimbolos(List<Simbolo> simbolos, List<String> assemblies) {       
         DefaultTableModel modelo = (DefaultTableModel) tabela.getModel();
-        modelo.setRowCount(0);
+        modelo.setRowCount(0);        
+        String data = ".data\n";
         for (Simbolo simbolo : simbolos) {
             modelo.addRow(new Object[]{
                 simbolo.id,
@@ -116,7 +105,21 @@ public class EspanhololFRM extends javax.swing.JFrame {
                 simbolo.funcao,
                 simbolo.vetor
             });
+            if(!simbolo.funcao)
+                data = data.concat(
+                        "\t"
+                        .concat(simbolo.id)
+                        .concat(": ")
+                        .concat("0\n")
+                );
         }
+        data = data.concat(".text\n");
+        for(String instrucao : assemblies)
+            data = data.concat("\t").concat(instrucao).concat("\n");
+        data = data.concat("HLT");
+        this.assembly.setTabSize(4);
+        this.assembly.setText(data);
+        this.assembly.revalidate();
         tabela.revalidate();
     }
 
@@ -146,6 +149,8 @@ public class EspanhololFRM extends javax.swing.JFrame {
         tabela = new javax.swing.JTable();
         jScrollPane3 = new javax.swing.JScrollPane();
         jsaida = new javax.swing.JList<>();
+        jScrollPane4 = new javax.swing.JScrollPane();
+        assembly = new javax.swing.JTextArea();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("ML - Marotage Language");
@@ -212,6 +217,10 @@ public class EspanhololFRM extends javax.swing.JFrame {
         jsaida.setForeground(new java.awt.Color(0, 255, 0));
         jScrollPane3.setViewportView(jsaida);
 
+        assembly.setColumns(20);
+        assembly.setRows(5);
+        jScrollPane4.setViewportView(assembly);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -223,9 +232,14 @@ public class EspanhololFRM extends javax.swing.JFrame {
                     .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel1)
-                            .addComponent(jScrollPane1))
-                        .addGap(9, 9, 9)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jScrollPane1)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel1)
+                                .addGap(10, 10, 10)))
                         .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(0, 444, Short.MAX_VALUE)
@@ -243,6 +257,7 @@ public class EspanhololFRM extends javax.swing.JFrame {
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane4)
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 207, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -273,16 +288,13 @@ public class EspanhololFRM extends javax.swing.JFrame {
         Sintatico sin = new Sintatico();
         Semantico sem = new Semantico();
         try {
-            
             sin.parse(lex, sem);
-            
-            
             sem.obterSimbolosNaoUtilizadosInicializados();
             for (String war : sem.warnings)
                 adicionarLog(war, Color.YELLOW);
             
-            preencherTabelaComSimbolos(sem.simbolos);
-                        
+            preencherTabelaComSimbolos(sem.simbolos, sem.assemblies);
+            System.out.println(sem.assemblies);           
             adicionarLog("Código analisado com sucesso.", Color.GREEN);            
         } catch (LexicalError | SemanticError |SyntaticError ex) {
             //Logger.getLogger(EspanhololStudio.class.getName()).log(Level.SEVERE, null, ex);
@@ -353,11 +365,13 @@ public class EspanhololFRM extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton abrirBTN;
+    private javax.swing.JTextArea assembly;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JButton jbtCompilarExecutar;
     private javax.swing.JList<String> jsaida;
     private javax.swing.JTextArea jtaCodigoFonte;

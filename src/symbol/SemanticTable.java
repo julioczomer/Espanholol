@@ -24,6 +24,8 @@ public class SemanticTable {
    public static final int MUL = 2;
    public static final int DIV = 3;
    public static final int REL = 4; // qualquer operador relacional
+   public static final int SLT = 5; // SLL
+   public static final int SRT = 6; // SRR
 
    // TIPO DE RETORNO DAS EXPRESSOES ENTRE TIPOS
    // 5 x 5 X 5  = TIPO X TIPO X OPER
