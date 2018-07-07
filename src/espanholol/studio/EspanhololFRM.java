@@ -105,13 +105,19 @@ public class EspanhololFRM extends javax.swing.JFrame {
                 simbolo.funcao,
                 simbolo.vetor
             });
-            if(!simbolo.funcao)
+            if(!simbolo.funcao) {
+                String zeros = "0";
+                if(simbolo.vetor)
+                    for (int i = 1; i < simbolo.dimensoes; i++)
+                        zeros = zeros.concat(", 0");
                 data = data.concat(
                         "\t"
                         .concat(simbolo.id)
                         .concat(": ")
-                        .concat("0\n")
+                        .concat(zeros)
+                        .concat("\n")
                 );
+            }
         }
         data = data.concat(".text\n");
         for(String instrucao : assemblies)

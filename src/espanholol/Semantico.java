@@ -39,6 +39,9 @@ public class Semantico implements Constants
     Boolean primeira_expr_vetor = true;
     Boolean operando_vetor = false;
     Boolean imprimir_vetor = false;
+    String op_rel_asm;
+    Boolean desvio_condicional = false;
+    Boolean passou_por_else = false;
     
     public Semantico() {
         escopos.push(new Pair("global", 0));
@@ -140,6 +143,8 @@ public class Semantico implements Constants
                         addInstrucaoAssembly(-1, lex, false);
                         primeira_expr = false;
                     }
+                    if(this.declarando)
+                        simbolos.get(obterIndiceSimboloMaisProximo(lex)).dimensoes = Integer.parseInt(lex);
                 } else {
                     if(primeira_expr_vetor) {
                         this.assemblies.add("LDI ".concat(lex));
@@ -238,13 +243,39 @@ public class Semantico implements Constants
                 }
             break;
             case 19:
+                // FIM DE UM IF
+                if(desvio_condicional) {
+                    assemblies.add(
+                        "R"
+                        .concat(
+                            Integer.toString(this.nivel).concat(":")
+                        )
+                    );
+                    desvio_condicional = false;
+                }
+                // FIM DE UM ELSE
+                if(this.passou_por_else) {
+                    assemblies.add("R ".concat(Integer.toString(this.nivel)));
+                    this.passou_por_else = false;
+                }
                 escopos.pop();
             break;
-            case 20:
+            case 20: // OPERACAO RELACIONAL                
                 if(obterResultadoOperacoes() == SemanticTable.ERR)
                     throw new SemanticError("Não é permitida operação relacional entre estes tipos");
+                assemblies.add("STO 1001");
+                assemblies.add("LD 1000");
+                assemblies.add("SUB 1001");
+                assemblies.add(
+                    op_rel_asm
+                    .concat(" R")
+                    .concat(Integer.toString(this.nivel+1))
+                );
+                this.desvio_condicional = true;
             break;
             case 21:
+                primeira_expr = true;
+                assemblies.add("STO 1000");
                 if(expr_vetor == 0)
                     this.op.push(SemanticTable.REL);
             break;
@@ -312,7 +343,39 @@ public class Semantico implements Constants
                 }
             break;
             case 31: // COUT
-                assemblies.add("STO $out_port");
+                assemblies.add("STO $out_port");                
+            break;
+            // MAIOR QUE
+            case 32:
+                this.op_rel_asm = "BLE";
+            break;
+            // MENOR QUE
+            case 33:
+                this.op_rel_asm = "BGE";
+            break;
+            // MAIOR IGUAL QUE
+            case 34:
+                this.op_rel_asm = "BLT";
+            break;
+            // MENOR IGUAL QUE
+            case 35:
+                this.op_rel_asm = "BGT";
+            break;
+            // IGUAL
+            case 36:
+                this.op_rel_asm = "BNE";
+            break;
+            // DIFERENTE
+            case 37:
+                this.op_rel_asm = "BEQ";
+            break;
+            // ELSE
+            case 38:
+                assemblies.add(
+                    assemblies.size()-1,
+                    "JMP R".concat(Integer.toString(this.nivel+1))
+                );
+                this.passou_por_else = true;
             break;
         }
     }

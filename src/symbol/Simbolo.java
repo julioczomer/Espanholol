@@ -30,7 +30,7 @@ public class Simbolo {
     public Integer parametro;
     public Boolean vetor;
     public Boolean funcao;
-    public Integer dimensoes;
+    public Integer dimensoes = 0;
     
     public String getTipo() {
         switch(this.tipo) {
